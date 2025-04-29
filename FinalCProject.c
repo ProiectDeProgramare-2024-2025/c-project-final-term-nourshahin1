@@ -267,15 +267,32 @@ void purchaseProperty() {
     clearScreen();
     int choice = readInteger("Enter property number to purchase (1-6): ");
 
-    if (choice < 1 || choice > MAX_PROPERTIES) {
+    if (choice < 1 || choice > MAX_PROPERTIES || strlen(properties[choice - 1].name) == 0) {
         printf(RED "Invalid selection.\n" RESET);
     } else {
         printf(GREEN " You have successfully purchased: %s\n" RESET, properties[choice - 1].name);
-        strcpy(properties[choice - 1].name, "SOLD");
+
+        memset(&properties[choice - 1], 0, sizeof(struct Property));
+
+        FILE *file = fopen(PROPERTY_FILE, "w");
+        if (file == NULL) {
+            printf(RED "Error hold on.\n" RESET);
+        } else {
+            for (int i = 0; i < MAX_PROPERTIES; i++) {
+                if (strlen(properties[i].name) > 0) {
+                    fprintf(file, "%s|%s|%d|%d|%d|%d|%d\n",
+                        properties[i].name, properties[i].address, properties[i].price,
+                        properties[i].size, properties[i].rooms, properties[i].bathrooms,
+                        properties[i].parking);
+                }
+            }
+            fclose(file);
+        }
     }
 
     pause();
 }
+
 
 void menu(int op) {
     switch (op) {
